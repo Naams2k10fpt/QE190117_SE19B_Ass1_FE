@@ -22,21 +22,23 @@ import { useToast } from "@/components/ToastContext";
 export default function HomePage() {
   const { error } = useToast();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    departmentsCount: 0,
-    projectsCount: 0,
-    tasksCount: 0,
-  });
-  const [activeProjects, setActiveProjects] = useState<ProjectListItemDto[]>([]);
+  const [stats, setStats] = useState<{
+    departmentsCount: number;
+    projectsCount: number;
+    tasksCount: number;
+  } | null>(null);
+  const [activeProjects, setActiveProjects] = useState<ProjectListItemDto[]>(
+    [],
+  );
 
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         const [depts, projects, tasks] = await Promise.all([
-          departmentsApi.getAll().catch(() => []),
-          projectsApi.getAll().catch(() => []),
-          tasksApi.getAll().catch(() => []),
+          departmentsApi.getAll(),
+          projectsApi.getAll(),
+          tasksApi.getAll(),
         ]);
 
         setStats({
@@ -67,8 +69,9 @@ export default function HomePage() {
             Streamline Projects, Departments & Tasks seamlessly
           </h1>
           <p className="text-blue-100 text-base sm:text-lg leading-relaxed max-w-2xl">
-            A comprehensive, public management portal connecting organizational departments,
-            active project milestones, and actionable team tasks with full CRUD controls.
+            A comprehensive, public management portal connecting organizational
+            departments, active project milestones, and actionable team tasks
+            with full CRUD controls.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
@@ -102,7 +105,7 @@ export default function HomePage() {
                 Active Departments
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 mt-1">
-                {loading ? "-" : stats.departmentsCount}
+                {loading ? "-" : (stats?.departmentsCount ?? "—")}
               </h3>
             </div>
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
@@ -127,7 +130,7 @@ export default function HomePage() {
                 Active Projects
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 mt-1">
-                {loading ? "-" : stats.projectsCount}
+                {loading ? "-" : (stats?.projectsCount ?? "—")}
               </h3>
             </div>
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
@@ -152,7 +155,7 @@ export default function HomePage() {
                 Active Tasks
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 mt-1">
-                {loading ? "-" : stats.tasksCount}
+                {loading ? "-" : (stats?.tasksCount ?? "—")}
               </h3>
             </div>
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
@@ -223,7 +226,8 @@ export default function HomePage() {
                   </h3>
 
                   <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                    {project.description || "No description provided for this project."}
+                    {project.description ||
+                      "No description provided for this project."}
                   </p>
                 </div>
 

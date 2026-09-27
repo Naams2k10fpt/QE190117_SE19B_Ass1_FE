@@ -18,13 +18,18 @@ import {
 } from "./types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
+  "http://localhost:5117";
 
 export class ApiError extends Error {
   status: number;
   errors?: Record<string, string[]>;
 
-  constructor(message: string, status: number, errors?: Record<string, string[]>) {
+  constructor(
+    message: string,
+    status: number,
+    errors?: Record<string, string[]>,
+  ) {
     super(message);
     this.status = status;
     this.errors = errors;
@@ -37,7 +42,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   const contentType = response.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
+  const isJson = contentType?.includes("json") ?? false;
   const data = isJson ? await response.json() : null;
 
   if (!response.ok) {
@@ -90,7 +95,7 @@ export const departmentsApi = {
       {
         headers: defaultHeaders,
         cache: "no-store",
-      }
+      },
     );
     return handleResponse<DepartmentListItemDto[]>(res);
   },
@@ -140,29 +145,37 @@ export const projectsApi = {
     return handleResponse<ProjectDetailDto>(res);
   },
 
-  getByDepartment: async (departmentId: number): Promise<ProjectListItemDto[]> => {
+  getByDepartment: async (
+    departmentId: number,
+  ): Promise<ProjectListItemDto[]> => {
     const res = await fetch(
       `${API_BASE_URL}/api/projects/department/${departmentId}`,
       {
         headers: defaultHeaders,
         cache: "no-store",
-      }
+      },
     );
     return handleResponse<ProjectListItemDto[]>(res);
   },
 
-  search: async (params: ProjectSearchParams): Promise<ProjectListItemDto[]> => {
+  search: async (
+    params: ProjectSearchParams,
+  ): Promise<ProjectListItemDto[]> => {
     const query = new URLSearchParams();
-    if (params.name && params.name.trim()) query.append("name", params.name.trim());
+    if (params.name && params.name.trim())
+      query.append("name", params.name.trim());
     if (params.status !== undefined && params.status !== null)
       query.append("status", params.status.toString());
     if (params.departmentId !== undefined && params.departmentId !== null)
       query.append("departmentId", params.departmentId.toString());
 
-    const res = await fetch(`${API_BASE_URL}/api/projects/search?${query.toString()}`, {
-      headers: defaultHeaders,
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/api/projects/search?${query.toString()}`,
+      {
+        headers: defaultHeaders,
+        cache: "no-store",
+      },
+    );
     return handleResponse<ProjectListItemDto[]>(res);
   },
 
@@ -221,7 +234,8 @@ export const tasksApi = {
 
   search: async (params: TaskSearchParams): Promise<TaskListItemDto[]> => {
     const query = new URLSearchParams();
-    if (params.title && params.title.trim()) query.append("title", params.title.trim());
+    if (params.title && params.title.trim())
+      query.append("title", params.title.trim());
     if (params.status !== undefined && params.status !== null)
       query.append("status", params.status.toString());
     if (params.priority !== undefined && params.priority !== null)
@@ -231,10 +245,13 @@ export const tasksApi = {
     if (params.tagId !== undefined && params.tagId !== null)
       query.append("tagId", params.tagId.toString());
 
-    const res = await fetch(`${API_BASE_URL}/api/tasks/search?${query.toString()}`, {
-      headers: defaultHeaders,
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/api/tasks/search?${query.toString()}`,
+      {
+        headers: defaultHeaders,
+        cache: "no-store",
+      },
+    );
     return handleResponse<TaskListItemDto[]>(res);
   },
 
