@@ -32,7 +32,10 @@ import { Modal } from "@/components/Modal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { EmptyState } from "@/components/EmptyState";
+import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/ToastContext";
+
+const PAGE_SIZE = 10;
 
 export default function TaskManagePage() {
   const { success, error } = useToast();
@@ -40,6 +43,7 @@ export default function TaskManagePage() {
   const [projects, setProjects] = useState<ProjectListItemDto[]>([]);
   const [tags, setTags] = useState<TaskTagDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter toolbar
   const [titleFilter, setTitleFilter] = useState("");
@@ -92,6 +96,7 @@ export default function TaskManagePage() {
   const handleFilterSearch = async () => {
     try {
       setLoading(true);
+      setCurrentPage(1);
       const data = await tasksApi.search({
         title: titleFilter || undefined,
         status: statusFilter !== "" ? Number(statusFilter) : undefined,
@@ -111,6 +116,7 @@ export default function TaskManagePage() {
     setStatusFilter("");
     setPriorityFilter("");
     setProjectFilter("");
+    setCurrentPage(1);
     loadData();
   };
 
@@ -226,6 +232,14 @@ export default function TaskManagePage() {
       setIsDeleting(false);
     }
   };
+
+  const totalPages = Math.max(1, Math.ceil(tasks.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pagedTasks = tasks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
 
   return (
     <div className="space-y-6">
@@ -350,7 +364,7 @@ export default function TaskManagePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {tasks.map((task) => (
+                {pagedTasks.map((task) => (
                   <tr key={task.taskId} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{task.taskId}
@@ -403,6 +417,14 @@ export default function TaskManagePage() {
               </tbody>
             </table>
           </div>
+        )}
+        {!loading && (
+          <Pagination
+            currentPage={page}
+            pageSize={PAGE_SIZE}
+            totalItems={tasks.length}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
 

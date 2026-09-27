@@ -23,13 +23,17 @@ import { Modal } from "@/components/Modal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { EmptyState } from "@/components/EmptyState";
+import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/ToastContext";
+
+const PAGE_SIZE = 10;
 
 export default function DepartmentManagePage() {
   const { success, error } = useToast();
   const [departments, setDepartments] = useState<DepartmentListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchFilter, setSearchFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -155,6 +159,16 @@ export default function DepartmentManagePage() {
       d.departmentName.toLowerCase().includes(searchFilter.toLowerCase()) ||
       d.departmentDescription.toLowerCase().includes(searchFilter.toLowerCase())
   );
+  const totalPages = Math.max(1, Math.ceil(filteredDepartments.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pagedDepartments = filteredDepartments.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setCurrentPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
 
   return (
     <div className="space-y-6">
@@ -185,12 +199,18 @@ export default function DepartmentManagePage() {
           type="text"
           placeholder="Filter by department name or description..."
           value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
+          onChange={(e) => {
+            setSearchFilter(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full text-sm bg-transparent border-none focus:outline-none placeholder-slate-400"
         />
         {searchFilter && (
           <button
-            onClick={() => setSearchFilter("")}
+            onClick={() => {
+              setSearchFilter("");
+              setCurrentPage(1);
+            }}
             className="text-xs text-slate-400 hover:text-slate-600 font-medium px-2 py-1"
           >
             Clear
@@ -227,7 +247,7 @@ export default function DepartmentManagePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredDepartments.map((dept) => (
+                {pagedDepartments.map((dept) => (
                   <tr key={dept.departmentId} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{dept.departmentId}
@@ -265,6 +285,14 @@ export default function DepartmentManagePage() {
               </tbody>
             </table>
           </div>
+        )}
+        {!loading && (
+          <Pagination
+            currentPage={page}
+            pageSize={PAGE_SIZE}
+            totalItems={filteredDepartments.length}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
 

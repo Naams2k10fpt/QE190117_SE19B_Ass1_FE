@@ -26,13 +26,17 @@ import { Modal } from "@/components/Modal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { EmptyState } from "@/components/EmptyState";
+import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/ToastContext";
+
+const PAGE_SIZE = 10;
 
 export default function ProjectManagePage() {
   const { success, error } = useToast();
   const [projects, setProjects] = useState<ProjectListItemDto[]>([]);
   const [departments, setDepartments] = useState<DepartmentListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filters
   const [nameFilter, setNameFilter] = useState("");
@@ -82,6 +86,7 @@ export default function ProjectManagePage() {
   const handleFilterSearch = async () => {
     try {
       setLoading(true);
+      setCurrentPage(1);
       const data = await projectsApi.search({
         name: nameFilter || undefined,
         status: statusFilter !== "" ? Number(statusFilter) : undefined,
@@ -99,6 +104,7 @@ export default function ProjectManagePage() {
     setNameFilter("");
     setStatusFilter("");
     setDeptFilter("");
+    setCurrentPage(1);
     loadData();
   };
 
@@ -209,6 +215,17 @@ export default function ProjectManagePage() {
     }
   };
 
+  const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pagedProjects = projects.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setCurrentPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
+
   return (
     <div className="space-y-6">
       {/* Title */}
@@ -317,7 +334,7 @@ export default function ProjectManagePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {projects.map((proj) => (
+                {pagedProjects.map((proj) => (
                   <tr key={proj.projectId} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{proj.projectId}
@@ -365,6 +382,14 @@ export default function ProjectManagePage() {
               </tbody>
             </table>
           </div>
+        )}
+        {!loading && (
+          <Pagination
+            currentPage={page}
+            pageSize={PAGE_SIZE}
+            totalItems={projects.length}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
 

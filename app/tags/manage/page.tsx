@@ -17,7 +17,10 @@ import { Modal } from "@/components/Modal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { EmptyState } from "@/components/EmptyState";
+import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/ToastContext";
+
+const PAGE_SIZE = 10;
 
 const PRESET_COLORS = [
   "#2563eb", // Blue
@@ -37,6 +40,7 @@ export default function TagManagePage() {
   const [tags, setTags] = useState<TaskTagDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchFilter, setSearchFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -150,6 +154,13 @@ export default function TagManagePage() {
   const filteredTags = tags.filter((tg) =>
     tg.tagName.toLowerCase().includes(searchFilter.toLowerCase())
   );
+  const totalPages = Math.max(1, Math.ceil(filteredTags.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pagedTags = filteredTags.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    setCurrentPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
 
   return (
     <div className="space-y-6">
@@ -180,12 +191,18 @@ export default function TagManagePage() {
           type="text"
           placeholder="Filter tags by name..."
           value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
+          onChange={(e) => {
+            setSearchFilter(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full text-sm bg-transparent border-none focus:outline-none placeholder-slate-400"
         />
         {searchFilter && (
           <button
-            onClick={() => setSearchFilter("")}
+            onClick={() => {
+              setSearchFilter("");
+              setCurrentPage(1);
+            }}
             className="text-xs text-slate-400 hover:text-slate-600 font-medium px-2 py-1"
           >
             Clear
@@ -223,7 +240,7 @@ export default function TagManagePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredTags.map((tg) => (
+                {pagedTags.map((tg) => (
                   <tr key={tg.tagId} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{tg.tagId}
@@ -263,6 +280,14 @@ export default function TagManagePage() {
               </tbody>
             </table>
           </div>
+        )}
+        {!loading && (
+          <Pagination
+            currentPage={page}
+            pageSize={PAGE_SIZE}
+            totalItems={filteredTags.length}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
 
