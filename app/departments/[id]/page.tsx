@@ -29,7 +29,11 @@ export default function DepartmentDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!departmentId || isNaN(departmentId)) return;
+    if (!Number.isInteger(departmentId) || departmentId <= 0) {
+      setDepartment(null);
+      setLoading(false);
+      return;
+    }
 
     async function loadDepartment() {
       try {

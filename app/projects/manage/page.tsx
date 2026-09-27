@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   FolderGit2,
@@ -46,7 +46,9 @@ export default function ProjectManagePage() {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    null,
+  );
 
   // Form states
   const [projectName, setProjectName] = useState("");
@@ -60,10 +62,12 @@ export default function ProjectManagePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete dialog
-  const [deleteTarget, setDeleteTarget] = useState<ProjectListItemDto | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProjectListItemDto | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [projList, deptList] = await Promise.all([
@@ -77,11 +81,11 @@ export default function ProjectManagePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleFilterSearch = async () => {
     try {
@@ -191,7 +195,7 @@ export default function ProjectManagePage() {
         success("Project updated successfully!");
       }
       setIsModalOpen(false);
-      await loadData();
+      await handleFilterSearch();
     } catch (err: any) {
       error(err.message || "Failed to save project.");
     } finally {
@@ -207,7 +211,7 @@ export default function ProjectManagePage() {
       await projectsApi.delete(deleteTarget.projectId);
       success(`Project "${deleteTarget.projectName}" deleted successfully.`);
       setDeleteTarget(null);
-      await loadData();
+      await handleFilterSearch();
     } catch (err: any) {
       error(err.message || "Failed to delete project.");
     } finally {
@@ -219,7 +223,7 @@ export default function ProjectManagePage() {
   const page = Math.min(currentPage, totalPages);
   const pagedProjects = projects.slice(
     (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
+    page * PAGE_SIZE,
   );
 
   useEffect(() => {
@@ -236,7 +240,8 @@ export default function ProjectManagePage() {
             Project Management
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Maintain projects, link departments, update schedules, or remove completed work.
+            Maintain projects, link departments, update schedules, or remove
+            completed work.
           </p>
         </div>
         <button
@@ -335,7 +340,10 @@ export default function ProjectManagePage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pagedProjects.map((proj) => (
-                  <tr key={proj.projectId} className="hover:bg-slate-50/80 transition">
+                  <tr
+                    key={proj.projectId}
+                    className="hover:bg-slate-50/80 transition"
+                  >
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{proj.projectId}
                     </td>
@@ -417,7 +425,9 @@ export default function ProjectManagePage() {
               }`}
             />
             {formErrors.projectName && (
-              <p className="text-xs text-rose-600 mt-1">{formErrors.projectName}</p>
+              <p className="text-xs text-rose-600 mt-1">
+                {formErrors.projectName}
+              </p>
             )}
           </div>
 
@@ -442,7 +452,9 @@ export default function ProjectManagePage() {
               ))}
             </select>
             {formErrors.departmentId && (
-              <p className="text-xs text-rose-600 mt-1">{formErrors.departmentId}</p>
+              <p className="text-xs text-rose-600 mt-1">
+                {formErrors.departmentId}
+              </p>
             )}
           </div>
 
@@ -475,7 +487,9 @@ export default function ProjectManagePage() {
                 }`}
               />
               {formErrors.startDate && (
-                <p className="text-xs text-rose-600 mt-1">{formErrors.startDate}</p>
+                <p className="text-xs text-rose-600 mt-1">
+                  {formErrors.startDate}
+                </p>
               )}
             </div>
 
@@ -494,7 +508,9 @@ export default function ProjectManagePage() {
                 }`}
               />
               {formErrors.endDate && (
-                <p className="text-xs text-rose-600 mt-1">{formErrors.endDate}</p>
+                <p className="text-xs text-rose-600 mt-1">
+                  {formErrors.endDate}
+                </p>
               )}
             </div>
           </div>
@@ -524,7 +540,10 @@ export default function ProjectManagePage() {
                 onChange={(e) => setIsActive(e.target.checked)}
                 className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="isActiveProj" className="text-sm font-medium text-slate-700">
+              <label
+                htmlFor="isActiveProj"
+                className="text-sm font-medium text-slate-700"
+              >
                 Project is Active
               </label>
             </div>

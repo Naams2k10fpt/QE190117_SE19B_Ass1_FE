@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   CheckSquare,
@@ -68,10 +68,12 @@ export default function TaskManagePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete dialog
-  const [deleteTarget, setDeleteTarget] = useState<TaskListItemDto | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TaskListItemDto | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [taskList, projList, tagList] = await Promise.all([
@@ -87,11 +89,11 @@ export default function TaskManagePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleFilterSearch = async () => {
     try {
@@ -157,7 +159,9 @@ export default function TaskManagePage() {
 
   const toggleTagSelection = (tagId: number) => {
     setSelectedTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId],
     );
   };
 
@@ -209,7 +213,7 @@ export default function TaskManagePage() {
         success("Task updated successfully!");
       }
       setIsModalOpen(false);
-      await loadData();
+      await handleFilterSearch();
     } catch (err: any) {
       error(err.message || "Failed to save task.");
     } finally {
@@ -225,7 +229,7 @@ export default function TaskManagePage() {
       await tasksApi.delete(deleteTarget.taskId);
       success(`Task "${deleteTarget.title}" soft-deleted successfully.`);
       setDeleteTarget(null);
-      await loadData();
+      await handleFilterSearch();
     } catch (err: any) {
       error(err.message || "Failed to delete task.");
     } finally {
@@ -251,7 +255,8 @@ export default function TaskManagePage() {
             Task Management
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Create, edit, attach tags, and soft-delete tasks across all projects.
+            Create, edit, attach tags, and soft-delete tasks across all
+            projects.
           </p>
         </div>
         <button
@@ -325,7 +330,10 @@ export default function TaskManagePage() {
           >
             Search
           </button>
-          {(titleFilter || statusFilter !== "" || priorityFilter !== "" || projectFilter !== "") && (
+          {(titleFilter ||
+            statusFilter !== "" ||
+            priorityFilter !== "" ||
+            projectFilter !== "") && (
             <button
               onClick={clearFilters}
               className="px-3 py-2 text-slate-500 hover:text-slate-800 text-sm font-medium transition"
@@ -365,7 +373,10 @@ export default function TaskManagePage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pagedTasks.map((task) => (
-                  <tr key={task.taskId} className="hover:bg-slate-50/80 transition">
+                  <tr
+                    key={task.taskId}
+                    className="hover:bg-slate-50/80 transition"
+                  >
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{task.taskId}
                     </td>
@@ -478,7 +489,9 @@ export default function TaskManagePage() {
               ))}
             </select>
             {formErrors.projectId && (
-              <p className="text-xs text-rose-600 mt-1">{formErrors.projectId}</p>
+              <p className="text-xs text-rose-600 mt-1">
+                {formErrors.projectId}
+              </p>
             )}
           </div>
 
@@ -572,7 +585,9 @@ export default function TaskManagePage() {
                         color: isSelected ? color : "#475569",
                       }}
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border transition transform ${
-                        isSelected ? "scale-105 font-bold shadow-sm" : "hover:border-slate-300"
+                        isSelected
+                          ? "scale-105 font-bold shadow-sm"
+                          : "hover:border-slate-300"
                       }`}
                     >
                       <span

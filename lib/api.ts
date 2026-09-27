@@ -66,16 +66,16 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
-const defaultHeaders = {
-  "Content-Type": "application/json",
+const readHeaders = {
   Accept: "application/json",
 };
+const jsonHeaders = { ...readHeaders, "Content-Type": "application/json" };
 
 // Department API
 export const departmentsApi = {
   getAll: async (): Promise<DepartmentListItemDto[]> => {
     const res = await fetch(`${API_BASE_URL}/api/departments`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<DepartmentListItemDto[]>(res);
@@ -83,7 +83,7 @@ export const departmentsApi = {
 
   getById: async (id: number): Promise<DepartmentDetailDto> => {
     const res = await fetch(`${API_BASE_URL}/api/departments/${id}`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<DepartmentDetailDto>(res);
@@ -93,7 +93,7 @@ export const departmentsApi = {
     const res = await fetch(
       `${API_BASE_URL}/api/departments/search?name=${encodeURIComponent(name)}`,
       {
-        headers: defaultHeaders,
+        headers: readHeaders,
         cache: "no-store",
       },
     );
@@ -103,7 +103,7 @@ export const departmentsApi = {
   create: async (data: CreateDepartmentDto): Promise<DepartmentDetailDto> => {
     const res = await fetch(`${API_BASE_URL}/api/departments`, {
       method: "POST",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<DepartmentDetailDto>(res);
@@ -112,7 +112,7 @@ export const departmentsApi = {
   update: async (id: number, data: UpdateDepartmentDto): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/departments/${id}`, {
       method: "PUT",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<void>(res);
@@ -121,7 +121,7 @@ export const departmentsApi = {
   delete: async (id: number): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/departments/${id}`, {
       method: "DELETE",
-      headers: defaultHeaders,
+      headers: readHeaders,
     });
     return handleResponse<void>(res);
   },
@@ -131,7 +131,7 @@ export const departmentsApi = {
 export const projectsApi = {
   getAll: async (): Promise<ProjectListItemDto[]> => {
     const res = await fetch(`${API_BASE_URL}/api/projects`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<ProjectListItemDto[]>(res);
@@ -139,7 +139,7 @@ export const projectsApi = {
 
   getById: async (id: number): Promise<ProjectDetailDto> => {
     const res = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<ProjectDetailDto>(res);
@@ -151,7 +151,7 @@ export const projectsApi = {
     const res = await fetch(
       `${API_BASE_URL}/api/projects/department/${departmentId}`,
       {
-        headers: defaultHeaders,
+        headers: readHeaders,
         cache: "no-store",
       },
     );
@@ -172,7 +172,7 @@ export const projectsApi = {
     const res = await fetch(
       `${API_BASE_URL}/api/projects/search?${query.toString()}`,
       {
-        headers: defaultHeaders,
+        headers: readHeaders,
         cache: "no-store",
       },
     );
@@ -182,7 +182,7 @@ export const projectsApi = {
   create: async (data: CreateProjectDto): Promise<ProjectDetailDto> => {
     const res = await fetch(`${API_BASE_URL}/api/projects`, {
       method: "POST",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<ProjectDetailDto>(res);
@@ -191,7 +191,7 @@ export const projectsApi = {
   update: async (id: number, data: UpdateProjectDto): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
       method: "PUT",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<void>(res);
@@ -200,7 +200,7 @@ export const projectsApi = {
   delete: async (id: number): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
       method: "DELETE",
-      headers: defaultHeaders,
+      headers: readHeaders,
     });
     return handleResponse<void>(res);
   },
@@ -210,7 +210,7 @@ export const projectsApi = {
 export const tasksApi = {
   getAll: async (): Promise<TaskListItemDto[]> => {
     const res = await fetch(`${API_BASE_URL}/api/tasks`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<TaskListItemDto[]>(res);
@@ -218,7 +218,7 @@ export const tasksApi = {
 
   getById: async (id: number): Promise<TaskDetailDto> => {
     const res = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<TaskDetailDto>(res);
@@ -226,7 +226,7 @@ export const tasksApi = {
 
   getByProject: async (projectId: number): Promise<TaskListItemDto[]> => {
     const res = await fetch(`${API_BASE_URL}/api/tasks/project/${projectId}`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<TaskListItemDto[]>(res);
@@ -248,7 +248,7 @@ export const tasksApi = {
     const res = await fetch(
       `${API_BASE_URL}/api/tasks/search?${query.toString()}`,
       {
-        headers: defaultHeaders,
+        headers: readHeaders,
         cache: "no-store",
       },
     );
@@ -258,7 +258,7 @@ export const tasksApi = {
   create: async (data: CreateTaskDto): Promise<TaskDetailDto> => {
     const res = await fetch(`${API_BASE_URL}/api/tasks`, {
       method: "POST",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<TaskDetailDto>(res);
@@ -267,7 +267,7 @@ export const tasksApi = {
   update: async (id: number, data: UpdateTaskDto): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
       method: "PUT",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<void>(res);
@@ -276,7 +276,7 @@ export const tasksApi = {
   delete: async (id: number): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
       method: "DELETE",
-      headers: defaultHeaders,
+      headers: readHeaders,
     });
     return handleResponse<void>(res);
   },
@@ -286,7 +286,7 @@ export const tasksApi = {
 export const tagsApi = {
   getAll: async (): Promise<TaskTagDto[]> => {
     const res = await fetch(`${API_BASE_URL}/api/tags`, {
-      headers: defaultHeaders,
+      headers: readHeaders,
       cache: "no-store",
     });
     return handleResponse<TaskTagDto[]>(res);
@@ -295,7 +295,7 @@ export const tagsApi = {
   create: async (data: CreateTagDto): Promise<TaskTagDto> => {
     const res = await fetch(`${API_BASE_URL}/api/tags`, {
       method: "POST",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<TaskTagDto>(res);
@@ -304,7 +304,7 @@ export const tagsApi = {
   update: async (id: number, data: CreateTagDto): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/tags/${id}`, {
       method: "PUT",
-      headers: defaultHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify(data),
     });
     return handleResponse<void>(res);
@@ -313,7 +313,7 @@ export const tagsApi = {
   delete: async (id: number): Promise<void> => {
     const res = await fetch(`${API_BASE_URL}/api/tags/${id}`, {
       method: "DELETE",
-      headers: defaultHeaders,
+      headers: readHeaders,
     });
     return handleResponse<void>(res);
   },

@@ -33,7 +33,11 @@ export default function TaskDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!taskId || isNaN(taskId)) return;
+    if (!Number.isInteger(taskId) || taskId <= 0) {
+      setTask(null);
+      setLoading(false);
+      return;
+    }
 
     async function loadTask() {
       try {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Search as SearchIcon,
@@ -17,7 +17,6 @@ import {
   TaskListItemDto,
   ProjectListItemDto,
   TaskTagDto,
-  TaskSearchParams,
 } from "@/lib/types";
 import {
   TaskStatusBadge,
@@ -58,36 +57,32 @@ export default function SearchPage() {
     loadFilterOptions();
   }, []);
 
-  // Search function
-  const runSearch = useCallback(
-    async (params: TaskSearchParams) => {
+  // Ignore responses from searches started before the filters changed.
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
       try {
         setLoading(true);
-        const data = await tasksApi.search(params);
-        setTasks(data);
+        const data = await tasksApi.search({
+          title: title.trim() || undefined,
+          status: status !== "" ? Number(status) : undefined,
+          priority: priority !== "" ? Number(priority) : undefined,
+          projectId: projectId !== "" ? Number(projectId) : undefined,
+          tagId: tagId !== "" ? Number(tagId) : undefined,
+        });
+        if (active) setTasks(data);
       } catch (err: any) {
-        error(err.message || "Failed to search tasks.");
+        if (active) error(err.message || "Failed to search tasks.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
-    },
-    [error]
-  );
-
-  // Debounced search on filter change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      runSearch({
-        title: title.trim() || undefined,
-        status: status !== "" ? Number(status) : undefined,
-        priority: priority !== "" ? Number(priority) : undefined,
-        projectId: projectId !== "" ? Number(projectId) : undefined,
-        tagId: tagId !== "" ? Number(tagId) : undefined,
-      });
     }, 300);
 
-    return () => clearTimeout(timer);
-  }, [title, status, priority, projectId, tagId, runSearch]);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [title, status, priority, projectId, tagId, error]);
 
   const handleResetFilters = () => {
     setTitle("");

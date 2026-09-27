@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Building2,
   Plus,
@@ -48,12 +48,11 @@ export default function DepartmentManagePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Delete dialog states
-  const [deleteTarget, setDeleteTarget] = useState<DepartmentListItemDto | null>(
-    null
-  );
+  const [deleteTarget, setDeleteTarget] =
+    useState<DepartmentListItemDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async () => {
     try {
       setLoading(true);
       const data = await departmentsApi.getAll();
@@ -63,11 +62,11 @@ export default function DepartmentManagePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
   useEffect(() => {
     loadDepartments();
-  }, []);
+  }, [loadDepartments]);
 
   const openCreateModal = () => {
     setModalMode("create");
@@ -100,7 +99,8 @@ export default function DepartmentManagePage() {
     if (!description.trim()) {
       errors.description = "Department description is required.";
     } else if (description.trim().length > 300) {
-      errors.description = "Department description must not exceed 300 characters.";
+      errors.description =
+        "Department description must not exceed 300 characters.";
     }
 
     setFormErrors(errors);
@@ -144,7 +144,9 @@ export default function DepartmentManagePage() {
     try {
       setIsDeleting(true);
       await departmentsApi.delete(deleteTarget.departmentId);
-      success(`Department "${deleteTarget.departmentName}" deleted successfully.`);
+      success(
+        `Department "${deleteTarget.departmentName}" deleted successfully.`,
+      );
       setDeleteTarget(null);
       await loadDepartments();
     } catch (err: any) {
@@ -157,13 +159,18 @@ export default function DepartmentManagePage() {
   const filteredDepartments = departments.filter(
     (d) =>
       d.departmentName.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      d.departmentDescription.toLowerCase().includes(searchFilter.toLowerCase())
+      d.departmentDescription
+        .toLowerCase()
+        .includes(searchFilter.toLowerCase()),
   );
-  const totalPages = Math.max(1, Math.ceil(filteredDepartments.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredDepartments.length / PAGE_SIZE),
+  );
   const page = Math.min(currentPage, totalPages);
   const pagedDepartments = filteredDepartments.slice(
     (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
+    page * PAGE_SIZE,
   );
 
   useEffect(() => {
@@ -180,7 +187,8 @@ export default function DepartmentManagePage() {
             Department Management
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Create, view, update, or remove departments. Deletion requires that no linked projects exist.
+            Create, view, update, or remove departments. Deletion requires that
+            no linked projects exist.
           </p>
         </div>
         <button
@@ -248,7 +256,10 @@ export default function DepartmentManagePage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pagedDepartments.map((dept) => (
-                  <tr key={dept.departmentId} className="hover:bg-slate-50/80 transition">
+                  <tr
+                    key={dept.departmentId}
+                    className="hover:bg-slate-50/80 transition"
+                  >
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{dept.departmentId}
                     </td>
@@ -300,7 +311,9 @@ export default function DepartmentManagePage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={modalMode === "create" ? "Create New Department" : "Edit Department"}
+        title={
+          modalMode === "create" ? "Create New Department" : "Edit Department"
+        }
       >
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
@@ -322,7 +335,9 @@ export default function DepartmentManagePage() {
             {formErrors.name && (
               <p className="text-xs text-rose-600 mt-1">{formErrors.name}</p>
             )}
-            <p className="text-[11px] text-slate-400 mt-1">Maximum 100 characters.</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Maximum 100 characters.
+            </p>
           </div>
 
           <div>
@@ -342,9 +357,13 @@ export default function DepartmentManagePage() {
               }`}
             />
             {formErrors.description && (
-              <p className="text-xs text-rose-600 mt-1">{formErrors.description}</p>
+              <p className="text-xs text-rose-600 mt-1">
+                {formErrors.description}
+              </p>
             )}
-            <p className="text-[11px] text-slate-400 mt-1">Maximum 300 characters.</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Maximum 300 characters.
+            </p>
           </div>
 
           {modalMode === "edit" && (
@@ -356,7 +375,10 @@ export default function DepartmentManagePage() {
                 onChange={(e) => setIsActive(e.target.checked)}
                 className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="isActiveDept" className="text-sm font-medium text-slate-700">
+              <label
+                htmlFor="isActiveDept"
+                className="text-sm font-medium text-slate-700"
+              >
                 Department is Active
               </label>
             </div>

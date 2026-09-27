@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -20,27 +20,37 @@ export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<DepartmentListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const latestRequestId = useRef(0);
 
-  const fetchDepartments = async (query = "") => {
-    try {
-      setLoading(true);
-      if (query.trim()) {
-        const results = await departmentsApi.search(query.trim());
-        setDepartments(results);
-      } else {
-        const all = await departmentsApi.getAll();
-        setDepartments(all);
+  const fetchDepartments = useCallback(
+    async (query = "") => {
+      const requestId = ++latestRequestId.current;
+      try {
+        setLoading(true);
+        if (query.trim()) {
+          const results = await departmentsApi.search(query.trim());
+          if (requestId === latestRequestId.current) setDepartments(results);
+        } else {
+          const all = await departmentsApi.getAll();
+          if (requestId === latestRequestId.current) setDepartments(all);
+        }
+      } catch (err: any) {
+        if (requestId === latestRequestId.current) {
+          error(err.message || "Failed to load departments.");
+        }
+      } finally {
+        if (requestId === latestRequestId.current) setLoading(false);
       }
-    } catch (err: any) {
-      error(err.message || "Failed to load departments.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [error],
+  );
 
   useEffect(() => {
     fetchDepartments();
-  }, []);
+    return () => {
+      latestRequestId.current += 1;
+    };
+  }, [fetchDepartments]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Tag as TagIcon,
   Plus,
@@ -57,7 +57,7 @@ export default function TagManagePage() {
   const [deleteTarget, setDeleteTarget] = useState<TaskTagDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     try {
       setLoading(true);
       const data = await tagsApi.getAll();
@@ -67,11 +67,11 @@ export default function TagManagePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
   useEffect(() => {
     loadTags();
-  }, []);
+  }, [loadTags]);
 
   const openCreateModal = () => {
     setModalMode("create");
@@ -152,11 +152,14 @@ export default function TagManagePage() {
   };
 
   const filteredTags = tags.filter((tg) =>
-    tg.tagName.toLowerCase().includes(searchFilter.toLowerCase())
+    tg.tagName.toLowerCase().includes(searchFilter.toLowerCase()),
   );
   const totalPages = Math.max(1, Math.ceil(filteredTags.length / PAGE_SIZE));
   const page = Math.min(currentPage, totalPages);
-  const pagedTags = filteredTags.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pagedTags = filteredTags.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
 
   useEffect(() => {
     setCurrentPage((current) => Math.min(current, totalPages));
@@ -172,7 +175,8 @@ export default function TagManagePage() {
             Tag Management
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Define labels and custom hex colors for categorization across project tasks.
+            Define labels and custom hex colors for categorization across
+            project tasks.
           </p>
         </div>
         <button
@@ -241,7 +245,10 @@ export default function TagManagePage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pagedTags.map((tg) => (
-                  <tr key={tg.tagId} className="hover:bg-slate-50/80 transition">
+                  <tr
+                    key={tg.tagId}
+                    className="hover:bg-slate-50/80 transition"
+                  >
                     <td className="py-4 px-6 font-mono text-xs text-slate-400">
                       #{tg.tagId}
                     </td>
@@ -350,7 +357,9 @@ export default function TagManagePage() {
 
           {/* Preset Swatches */}
           <div>
-            <span className="block text-xs text-slate-400 mb-2">Preset Colors</span>
+            <span className="block text-xs text-slate-400 mb-2">
+              Preset Colors
+            </span>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((c) => (
                 <button
@@ -371,7 +380,9 @@ export default function TagManagePage() {
 
           {/* Live Preview */}
           <div className="pt-2">
-            <span className="block text-xs text-slate-400 mb-1.5">Live Preview</span>
+            <span className="block text-xs text-slate-400 mb-1.5">
+              Live Preview
+            </span>
             <TagPill tag={{ tagName: tagName || "Tag Preview", color }} />
           </div>
 

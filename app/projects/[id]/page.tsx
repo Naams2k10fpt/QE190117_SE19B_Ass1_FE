@@ -35,7 +35,11 @@ export default function ProjectDetailPage() {
   const [taskStatusFilter, setTaskStatusFilter] = useState<string>("ALL");
 
   useEffect(() => {
-    if (!projectId || isNaN(projectId)) return;
+    if (!Number.isInteger(projectId) || projectId <= 0) {
+      setProject(null);
+      setLoading(false);
+      return;
+    }
 
     async function loadProject() {
       try {
