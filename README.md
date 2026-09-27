@@ -1,6 +1,6 @@
 # TaskTrack frontend · PRN232 Assignment 1
 
-Public Next.js 14 app for browsing and managing departments, projects, tasks, and tags. It uses the App Router, TypeScript, Tailwind CSS, and the [TaskTrack API](https://github.com/Naams2k10fpt/QE190117_SE19B_Ass1_BE).
+Public Next.js 15 app for browsing and managing departments, projects, tasks, and tags. It uses the App Router, TypeScript, Tailwind CSS, and the [TaskTrack API](https://github.com/Naams2k10fpt/QE190117_SE19B_Ass1_BE).
 
 ## Database ERD
 
